@@ -14,6 +14,8 @@ Lao Tzu said: ``If you want to shrink something, you must first allow it to expa
 
 Kan extensions raise the level of abstraction even higher. Mac Lane said: ``All concepts are Kan extensions.''
 
+
+Your insight into the hierarchical nature of abstraction in category theory is spot on. As we identify patterns and structures, we continuously refine our understanding, revealing deeper connections and more generalized concepts. This process of abstraction not only simplifies the representation of ideas but also highlights fundamental relationships across various mathematical domains. The relationship you draw between products, coproducts, limits, and adjunctions illustrates how interconnected these concepts are, reflecting Mac Lane's assertion regarding Kan extensions. It encapsulates the essence of category theory: to distill complex relationships into elegant, overarching principles.
 \section{Closed Monoidal Categories}
 
 We've seen how a function object can be defined as the right adjoint to the categorical product:
@@ -35,6 +37,10 @@ It is often used in the context of \index{linear types}linear types.
 
 The definition of the internal hom works well for a symmetric monoidal category. If the tensor product is not symmetric, the adjunction defines a \emph{left closed} monoidal category. The left internal hom is adjoint to the ``post-multiplication'' functor $(- \otimes b)$. The right-closed structure is defined as the right adjoint to the ``pre-multiplication'' functor $(b \otimes -)$. If both are defined than the category is called \index{bi-closed monoidal category}\emph{bi-closed}.
 
+
+In closed monoidal categories, the internal hom, denoted as \([b, c]\) or \(b \multimap c\), provides a way to express morphisms in a manner analogous to function spaces in set theory. The isomorphism \(\cat C(a \otimes b, c) \cong \cat C(a, [b, c])\) characterizes the structure of these categories, allowing morphisms out of a tensor product to be viewed as morphisms into an internal hom.
+
+This framework can be extended to both left-closed and right-closed categories, depending on the adjunctions defined by the tensor product. In left-closed categories, the focus is on the adjunction with the post-multiplication functor, while in right-closed categories, the emphasis is on pre-multiplication. If both structures exist, we refer to the category as bi-closed, facilitating a richer interplay between the internal hom and the tensor product. This bifurcation yields powerful abstractions, particularly in contexts such as linear types, where the distinctions between left and right closures become significantly impactful.
 
 \subsection{Internal hom for Day convolution}
 
@@ -65,6 +71,53 @@ rtol :: Functor h =>
 \end{haskell}
 \end{exercise}
 
+
+To implement the internal hom for Day convolution in Haskell, we can begin by defining type aliases that reflect the structures involved in Day convolution. We'll represent co-presheaves, morphisms, and their relationships. Here's a basic structure that represents this concept:
+
+1. **Define the category**: We assume a category `C` has objects and morphisms implemented as types.
+
+2. **Define the internal hom**: We'll create type aliases to encapsulate the idea of the internal hom for Day convolution.
+
+Here's a sample Haskell implementation:
+
+```haskell
+{-# LANGUAGE RankNTypes #-}
+
+module DayConvolution where
+
+import Control.Category
+import Prelude hiding ((.), id)
+
+-- Define the category structure
+class Category cat where
+    id :: cat a a
+    (.) :: cat b c -> cat a b -> cat a c
+
+-- Type aliases for presheaves and morphisms
+type Presheaf c = forall a. c a -> Set
+type Hom c a b = Presheaf c a -> Presheaf c b
+
+-- Day convolution for presheaves
+type DayConvolution c f g x = forall a b. (c a b) -> (f a) -> (g b) -> Set
+
+-- Internal hom for Day convolution
+type InternalHomDay c f g x = Hom c (DayConvolution c f g x) (DayConvolution c f g x)
+
+-- Example of constructing an internal hom
+internalHom :: (Category c) => (DayConvolution c f g x) -> InternalHomDay c f g x
+internalHom f = \x y -> f (id x) (f x) (g y) -- Example function (adjust based on actual definitions)
+
+```
+
+### Explanation of Code:
+- **Category**: We define a basic category class with identity and composition.
+- **Presheaf**: A `Presheaf c` type is defined as a function that takes a morphism in category `C` and returns a set.
+- **Hom**: This represents morphisms between presheaves.
+- **DayConvolution**: A type alias that represents the Day convolution structure for two presheaves `f` and `g`.
+- **InternalHomDay**: This represents the internal hom for the Day convolution.
+- **internalHom**: A simple example showing how you might construct an internal hom from a Day convolution.
+
+In practice, more concrete structures may need to be defined based on the specific category and presheaf structure you are working with, and you might also want to introduce additional type complex for elements, factors, etc., appropriate to your scenario.
 \subsection{Powering and co-powering}
 
 In the category of sets, the internal hom (the function object, or the exponential) is isomorphic to the external hom (the set of morphisms between two objects):
